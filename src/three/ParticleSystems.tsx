@@ -1,13 +1,12 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { scrollProgressRef, smoothstep, mapRange, lerp } from '@/three/scrollState';
+import { scrollProgressRef, smoothstep } from '@/three/scrollState';
 
 interface ParticleSystemProps {
   count?: number;
 }
 
-// Atmospheric dust particles — visible throughout
 export function AtmosphereParticles({ count = 200 }: ParticleSystemProps) {
   const ref = useRef<THREE.Points>(null);
 
@@ -34,18 +33,8 @@ export function AtmosphereParticles({ count = 200 }: ParticleSystemProps) {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-size"
-          count={count}
-          array={sizes}
-          itemSize={1}
-        />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-size" count={count} array={sizes} itemSize={1} />
       </bufferGeometry>
       <pointsMaterial
         size={0.05}
@@ -60,7 +49,6 @@ export function AtmosphereParticles({ count = 200 }: ParticleSystemProps) {
   );
 }
 
-// Roasting smoke/heat particles
 export function RoastingParticles({ count = 100 }: ParticleSystemProps) {
   const ref = useRef<THREE.Points>(null);
   const velocities = useMemo(() => {
@@ -87,7 +75,10 @@ export function RoastingParticles({ count = 100 }: ParticleSystemProps) {
     if (!ref.current) return;
     const p = scrollProgressRef.current;
     const mat = ref.current.material as THREE.PointsMaterial;
-    mat.opacity = smoothstep(0.24, 0.34, p) * smoothstep(0.42, 0.36, p) * 0.4;
+    mat.opacity =
+      smoothstep(0.24, 0.34, p) *
+      (1 - smoothstep(0.36, 0.42, p)) *
+      0.4;
 
     const posAttr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
     const arr = posAttr.array as Float32Array;
@@ -107,12 +98,7 @@ export function RoastingParticles({ count = 100 }: ParticleSystemProps) {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
         size={0.15}
@@ -127,71 +113,74 @@ export function RoastingParticles({ count = 100 }: ParticleSystemProps) {
   );
 }
 
-// Grinding fragments — particles bursting outward
-export function GrindingParticles({ count = 80 }: ParticleSystemProps) {
+// Coffee grounds fall from the grinder outlet instead of exploding from the screen centre.
+export function GrindingParticles({ count = 120 }: ParticleSystemProps) {
   const ref = useRef<THREE.Points>(null);
-  const { positions, velocities } = useMemo(() => {
+  const outlet = useMemo(() => new THREE.Vector3(0, -0.35, 4.2), []);
+  const { positions, velocities, drift } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const velocities = new Float32Array(count * 3);
+    const drift = new Float32Array(count);
+
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = 0;
-      positions[i * 3 + 1] = 0;
-      positions[i * 3 + 2] = 3;
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 0.04 + 0.01;
-      velocities[i * 3] = Math.cos(angle) * speed;
-      velocities[i * 3 + 1] = Math.sin(angle) * speed + 0.02;
-      velocities[i * 3 + 2] = Math.random() * 0.02;
+      positions[i * 3] = outlet.x + (Math.random() - 0.5) * 0.12;
+      positions[i * 3 + 1] = outlet.y;
+      positions[i * 3 + 2] = outlet.z + (Math.random() - 0.5) * 0.12;
+      velocities[i * 3] = (Math.random() - 0.5) * 0.04;
+      velocities[i * 3 + 1] = -(Math.random() * 0.055 + 0.025);
+      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.025;
+      drift[i] = Math.random() * Math.PI * 2;
     }
-    return { positions, velocities };
-  }, [count]);
+    return { positions, velocities, drift };
+  }, [count, outlet]);
 
-  const seed = useRef(0);
-
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (!ref.current) return;
-    const p = scrollProgressRef.current;
-    const mat = ref.current.material as THREE.PointsMaterial;
 
-    const intensity = smoothstep(0.42, 0.50, p) * smoothstep(0.56, 0.48, p);
-    mat.opacity = intensity * 0.6;
+    const p = scrollProgressRef.current;
+    const intensity =
+      smoothstep(0.46, 0.49, p) *
+      (1 - smoothstep(0.54, 0.60, p));
+
+    const mat = ref.current.material as THREE.PointsMaterial;
+    mat.opacity = intensity * 0.78;
+
+    const posAttr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
+    const arr = posAttr.array as Float32Array;
 
     if (intensity > 0.01) {
-      seed.current += delta;
-      const posAttr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
-      const arr = posAttr.array as Float32Array;
       for (let i = 0; i < count; i++) {
-        arr[i * 3] += velocities[i * 3] * delta * 60;
-        arr[i * 3 + 1] += velocities[i * 3 + 1] * delta * 60 - 0.01 * delta * 30;
-        arr[i * 3 + 2] += velocities[i * 3 + 2] * delta * 30;
+        arr[i * 3] +=
+          (velocities[i * 3] + Math.sin(state.clock.elapsedTime * 4 + drift[i]) * 0.004) *
+          delta * 60;
+        arr[i * 3 + 1] += velocities[i * 3 + 1] * delta * 60;
+        arr[i * 3 + 2] += velocities[i * 3 + 2] * delta * 60;
+
+        if (arr[i * 3 + 1] < -2.8 || Math.random() < delta * 0.08) {
+          arr[i * 3] = outlet.x + (Math.random() - 0.5) * 0.12;
+          arr[i * 3 + 1] = outlet.y;
+          arr[i * 3 + 2] = outlet.z + (Math.random() - 0.5) * 0.12;
+        }
       }
-      posAttr.needsUpdate = true;
-    } else if (intensity < 0.05) {
-      // Reset particles
-      const posAttr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
-      const arr = posAttr.array as Float32Array;
+    } else {
       for (let i = 0; i < count; i++) {
-        arr[i * 3] = 0;
-        arr[i * 3 + 1] = 0;
-        arr[i * 3 + 2] = 3;
+        arr[i * 3] = outlet.x + (Math.random() - 0.5) * 0.12;
+        arr[i * 3 + 1] = outlet.y;
+        arr[i * 3 + 2] = outlet.z + (Math.random() - 0.5) * 0.12;
       }
-      posAttr.needsUpdate = true;
     }
+
+    posAttr.needsUpdate = true;
   });
 
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.08}
-        color="#3b2417"
+        size={0.055}
+        color="#4b2815"
         transparent
         opacity={0}
         sizeAttenuation
@@ -201,7 +190,6 @@ export function GrindingParticles({ count = 80 }: ParticleSystemProps) {
   );
 }
 
-// Brewing — swirling liquid particles
 export function BrewingParticles({ count = 120 }: ParticleSystemProps) {
   const ref = useRef<THREE.Points>(null);
   const { positions, angles, radii } = useMemo(() => {
@@ -222,7 +210,10 @@ export function BrewingParticles({ count = 120 }: ParticleSystemProps) {
     if (!ref.current) return;
     const p = scrollProgressRef.current;
     const mat = ref.current.material as THREE.PointsMaterial;
-    mat.opacity = smoothstep(0.48, 0.56, p) * smoothstep(0.70, 0.62, p) * 0.5;
+    mat.opacity =
+      smoothstep(0.48, 0.56, p) *
+      (1 - smoothstep(0.62, 0.70, p)) *
+      0.5;
 
     const posAttr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
     const arr = posAttr.array as Float32Array;
@@ -238,12 +229,7 @@ export function BrewingParticles({ count = 120 }: ParticleSystemProps) {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
         size={0.06}
@@ -258,7 +244,6 @@ export function BrewingParticles({ count = 120 }: ParticleSystemProps) {
   );
 }
 
-// Final cup steam
 export function SteamParticles({ count = 60 }: ParticleSystemProps) {
   const ref = useRef<THREE.Points>(null);
   const velocities = useMemo(() => {
@@ -305,12 +290,7 @@ export function SteamParticles({ count = 60 }: ParticleSystemProps) {
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={positions}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
         size={0.2}
