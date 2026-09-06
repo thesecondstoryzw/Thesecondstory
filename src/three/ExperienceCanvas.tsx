@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber';
 import { Suspense } from 'react';
 import * as THREE from 'three';
 import { BeanModel } from '@/three/BeanModel';
+import { GrinderModel } from '@/three/GrinderModel';
 import {
   AtmosphereParticles,
   RoastingParticles,
@@ -39,12 +40,13 @@ export function ExperienceCanvas({ isMobile }: ExperienceCanvasProps) {
         <ScrollCamera />
 
         <BeanModel />
+        <GrinderModel />
 
         <AtmosphereParticles count={isMobile ? 100 : 200} />
         {!isMobile && (
           <>
             <RoastingParticles count={80} />
-            <GrindingParticles count={60} />
+            <GrindingParticles count={120} />
             <BrewingParticles count={100} />
             <SteamParticles count={50} />
           </>
