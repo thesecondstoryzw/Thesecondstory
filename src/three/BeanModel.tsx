@@ -19,8 +19,8 @@ export function BeanModel() {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
         child.receiveShadow = true;
-        if (child.material) {
-          const mat = child.material as THREE.MeshStandardMaterial;
+        const mat = child.material as THREE.MeshStandardMaterial;
+        if (mat) {
           mat.envMapIntensity = 0.8;
           mat.needsUpdate = true;
         }
@@ -36,25 +36,21 @@ export function BeanModel() {
   const currentRotation = useRef({ x: 0, y: 0, z: 0 });
 
   useEffect(() => {
-    return () => {
-      useGLTF.clear(MODEL_PATH);
-    };
+    return () => useGLTF.clear(MODEL_PATH);
   }, []);
 
   useFrame((_, delta) => {
     if (!group.current) return;
+
     const p = scrollProgressRef.current;
     const vw = viewport.width;
     const vh = viewport.height;
 
-    // Determine bean state based on scroll progress
     if (p < 0.04) {
-      // Hidden during hero
       visibility.current = 0;
       targetPosition.current = { x: -vw * 0.8, y: 0, z: 0 };
       targetScale.current = 0.4;
     } else if (p < 0.16) {
-      // Stage 1: Bean enters from left
       visibility.current = smoothstep(0.04, 0.08, p);
       targetPosition.current = {
         x: mapRange(p, 0.04, 0.16, -vw * 0.8, -vw * 0.35),
@@ -68,7 +64,6 @@ export function BeanModel() {
         z: 0,
       };
     } else if (p < 0.28) {
-      // Stage 2: Bean travels left to right
       visibility.current = 1;
       targetPosition.current = {
         x: mapRange(p, 0.16, 0.28, -vw * 0.35, vw * 0.35),
@@ -82,51 +77,42 @@ export function BeanModel() {
         z: Math.sin((p - 0.16) * 10) * 0.2,
       };
     } else if (p < 0.40) {
-      // Stage 3: Roasting — bean moves center, warmer light
       visibility.current = 1;
       targetPosition.current = {
         x: mapRange(p, 0.28, 0.40, vw * 0.35, 0),
-        y: mapRange(p, 0.28, 0.40, vh * 0.1, vh * 0.05),
-        z: mapRange(p, 0.28, 0.40, 2, 3),
+        y: mapRange(p, 0.28, 0.40, vh * 0.1, 0.5),
+        z: mapRange(p, 0.28, 0.40, 2, 3.5),
       };
-      targetScale.current = mapRange(p, 0.28, 0.40, 0.5, 0.7);
+      targetScale.current = mapRange(p, 0.28, 0.40, 0.5, 0.68);
       targetRotation.current = {
         x: (p - 0.28) * 5,
         y: mapRange(p, 0.28, 0.40, Math.PI * 1.5, Math.PI * 2.5),
         z: 0,
       };
     } else if (p < 0.52) {
-      // Stage 4: Grinding — bean approaches camera then fragments
-      visibility.current = smoothstep(0.52, 0.48, p);
+      // The bean is now our character entering the grinder hopper.
+      visibility.current = 1 - smoothstep(0.49, 0.52, p);
       targetPosition.current = {
-        x: 0,
-        y: mapRange(p, 0.40, 0.52, vh * 0.05, 0),
-        z: mapRange(p, 0.40, 0.48, 3, 6),
+        x: mapRange(p, 0.40, 0.52, 0, 0.02),
+        y: mapRange(p, 0.40, 0.52, 0.5, 0.92),
+        z: mapRange(p, 0.40, 0.52, 3.5, 3.25),
       };
-      targetScale.current = mapRange(p, 0.40, 0.46, 0.7, 0.9);
+      targetScale.current = mapRange(p, 0.40, 0.52, 0.68, 0.12);
       targetRotation.current = {
-        x: (p - 0.40) * 8,
-        y: (p - 0.40) * 6,
-        z: (p - 0.40) * 4,
+        x: (p - 0.40) * 12,
+        y: (p - 0.40) * 9,
+        z: (p - 0.40) * 5,
       };
-    } else if (p < 0.72) {
-      // Stage 5-6: Brewing & Pouring — bean hidden, particles take over
-      visibility.current = 0;
-      targetPosition.current = { x: 0, y: 0, z: 0 };
-      targetScale.current = 0.3;
     } else {
-      // Final — hidden
       visibility.current = 0;
-      targetPosition.current = { x: 0, y: 0, z: 0 };
-      targetScale.current = 0.3;
+      targetPosition.current = { x: 0, y: 0.9, z: 3.25 };
+      targetScale.current = 0.1;
     }
 
-    // Mouse parallax — subtle
     const mx = mouseRef.x * 0.3;
     const my = mouseRef.y * 0.2;
-
-    // Smooth interpolation
     const smoothing = 1 - Math.pow(0.001, delta);
+
     currentRotation.current.x = lerp(
       currentRotation.current.x,
       targetRotation.current.x,
@@ -156,16 +142,13 @@ export function BeanModel() {
     group.current.rotation.y = targetRotation.current.y + mx * 0.3;
     group.current.rotation.z = targetRotation.current.z;
 
-    // Visibility
-    const currentVis = group.current.visible ? 1 : 0;
-    const newVis = lerp(currentVis, visibility.current, smoothing);
-    group.current.visible = newVis > 0.01;
+    group.current.visible = visibility.current > 0.01;
     if (group.current.visible) {
       group.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           const mat = child.material as THREE.MeshStandardMaterial;
-          mat.opacity = newVis;
-          mat.transparent = true;
+          mat.opacity = visibility.current;
+          mat.transparent = visibility.current < 0.999;
         }
       });
     }
