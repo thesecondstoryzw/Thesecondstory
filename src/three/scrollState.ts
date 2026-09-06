@@ -1,0 +1,56 @@
+import { useRef } from 'react';
+
+export const scrollProgressRef = { current: 0 };
+
+export const mouseRef = { x: 0, y: 0 };
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(
+    'mousemove',
+    (e) => {
+      mouseRef.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseRef.y = (e.clientY / window.innerHeight) * 2 - 1;
+    },
+    { passive: true }
+  );
+}
+
+export function useScrollProgress() {
+  return scrollProgressRef;
+}
+
+export const scenePhases = {
+  hero: { start: 0, end: 0.06 },
+  beanEnters: { start: 0.04, end: 0.16 },
+  beanTravels: { start: 0.12, end: 0.28 },
+  roasting: { start: 0.24, end: 0.40 },
+  grinding: { start: 0.36, end: 0.52 },
+  brewing: { start: 0.48, end: 0.66 },
+  pouring: { start: 0.62, end: 0.76 },
+  finalCup: { start: 0.72, end: 0.84 },
+};
+
+export type PhaseName = keyof typeof scenePhases;
+
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+export function clamp(v: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, v));
+}
+
+export function smoothstep(min: number, max: number, value: number): number {
+  const t = clamp((value - min) / (max - min), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
+export function mapRange(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number
+): number {
+  return lerp(outMin, outMax, smoothstep(inMin, inMax, value));
+}

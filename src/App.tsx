@@ -1,14 +1,10 @@
 import { Navigation } from '@/components/Navigation';
 import { ScrollProgress } from '@/components/ScrollProgress';
 import { Footer } from '@/components/Footer';
-import { Hero } from '@/scenes/Hero';
-import { Entrance } from '@/scenes/Entrance';
-import { BrandStory } from '@/scenes/BrandStory';
-import { CoffeeExperience } from '@/scenes/CoffeeExperience';
-import { Roastery } from '@/scenes/Roastery';
-import { Products } from '@/scenes/Products';
-import { Gallery } from '@/scenes/Gallery';
-import { Visit } from '@/scenes/Visit';
+import { CinematicHero } from '@/scenes/CinematicHero';
+import { CinematicExperience } from '@/scenes/CinematicExperience';
+import { CommunityStory } from '@/scenes/CommunityStory';
+import { FinalEnding } from '@/scenes/FinalEnding';
 
 function App() {
   return (
@@ -17,14 +13,12 @@ function App() {
       <Navigation />
 
       <main>
-        <Hero />
-        <Entrance />
-        <BrandStory />
-        <CoffeeExperience />
-        <Roastery />
-        <Products />
-        <Gallery />
-        <Visit />
+        <CinematicHero />
+        <div id="experience">
+          <CinematicExperience />
+        </div>
+        <CommunityStory />
+        <FinalEnding />
       </main>
 
       <Footer />
