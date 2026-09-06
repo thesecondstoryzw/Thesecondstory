@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
@@ -18,20 +18,21 @@ export function GrinderModel() {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        child.material = Array.isArray(child.material)
+          ? child.material.map((material) => material.clone())
+          : child.material.clone();
 
-        const material = child.material as THREE.MeshStandardMaterial;
-        if (material) {
-          material.envMapIntensity = 1.1;
+        const materials = Array.isArray(child.material)
+          ? child.material
+          : [child.material];
+        materials.forEach((material) => {
+          if ('envMapIntensity' in material) material.envMapIntensity = 1.1;
           material.needsUpdate = true;
-        }
+        });
       }
     });
     return copy;
   }, [scene]);
-
-  useEffect(() => {
-    return () => useGLTF.clear(MODEL_PATH);
-  }, []);
 
   useFrame((state, delta) => {
     if (!group.current) return;
@@ -52,7 +53,10 @@ export function GrinderModel() {
 
     const settle = smoothstep(0.32, 0.40, p);
     const targetX = vibration;
-    const targetY = -1.45 + vibration * 0.35;
+    // The model's local bounds are X: -0.49..0.49, Y: 0..0.97 and
+    // Z: -0.95..0.95. Its origin is at the base, so this keeps the full
+    // silhouette in the grinder close-up rather than below the camera target.
+    const targetY = -1.05 + vibration * 0.35;
     const targetZ = 3;
     const targetRotationY =
       lerp(-0.16, 0.1, settle) +
@@ -76,7 +80,7 @@ export function GrinderModel() {
       smoothing
     );
 
-    const scale = 3;
+    const scale = 2.6;
     group.current.scale.lerp(
       new THREE.Vector3(scale, scale, scale),
       smoothing
@@ -85,17 +89,19 @@ export function GrinderModel() {
     group.current.visible = visibility > 0.01;
     group.current.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        const material = child.material as THREE.MeshStandardMaterial;
-        if (material) {
+        const materials = Array.isArray(child.material)
+          ? child.material
+          : [child.material];
+        materials.forEach((material) => {
           material.transparent = visibility < 0.999;
           material.opacity = visibility;
-        }
+        });
       }
     });
   });
 
   return (
-    <group ref={group} position={[0, -1.45, 3]} scale={3} visible={false}>
+    <group ref={group} position={[0, -1.05, 3]} scale={2.6} visible={false}>
       <primitive object={cloned} />
       <pointLight
         position={[0, -0.25, 1.25]}
