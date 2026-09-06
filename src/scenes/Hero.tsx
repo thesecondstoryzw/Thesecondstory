@@ -33,6 +33,7 @@ export function Hero() {
   const textY = useTransform(scrollYProgress, [0, 0.65], [0, -110]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.6, 0.88], [1, 1, 0]);
   const vignetteOpacity = useTransform(scrollYProgress, [0, 1], [0.72, 1]);
+  const combinedTextY = useTransform([textY, textParallaxY], ([scrollY, parallaxY]) => scrollY + parallaxY);
 
   return (
     <section id="hero" ref={ref} className="relative h-[170vh] w-full">
@@ -73,7 +74,7 @@ export function Hero() {
           className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 pointer-events-none"
           style={{
             x: reduced ? 0 : textX,
-            y: reduced ? textY : useTransform(textY, (value) => value + textParallaxY.get()),
+            y: reduced ? textY : combinedTextY,
             opacity: textOpacity,
           }}
         >
