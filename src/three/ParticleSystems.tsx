@@ -259,9 +259,9 @@ export function SteamParticles({ count = 60 }: ParticleSystemProps) {
   const { positions } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 0.8;
-      positions[i * 3 + 1] = 1.45 + Math.random() * 1.1;
-      positions[i * 3 + 2] = 2.2 + (Math.random() - 0.5) * 0.18;
+      positions[i * 3] = (Math.random() - 0.5) * 0.34;
+      positions[i * 3 + 1] = 0.58 + Math.random() * 0.85;
+      positions[i * 3 + 2] = 3.12 + (Math.random() - 0.5) * 0.22;
     }
     return { positions };
   }, [count]);
@@ -270,7 +270,7 @@ export function SteamParticles({ count = 60 }: ParticleSystemProps) {
     if (!ref.current) return;
     const p = scrollProgressRef.current;
     const mat = ref.current.material as THREE.PointsMaterial;
-    mat.opacity = smoothstep(0.72, 0.80, p) * 0.3;
+    mat.opacity = smoothstep(0.76, 0.84, p) * 0.46;
 
     const posAttr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
     const arr = posAttr.array as Float32Array;
@@ -278,10 +278,11 @@ export function SteamParticles({ count = 60 }: ParticleSystemProps) {
       arr[i * 3] += velocities[i * 3] * delta * 60;
       arr[i * 3 + 1] += velocities[i * 3 + 1] * delta * 60;
       arr[i * 3 + 2] += velocities[i * 3 + 2] * delta * 60;
-      if (arr[i * 3 + 1] > 4.3) {
-        arr[i * 3] = (Math.random() - 0.5) * 0.8;
-        arr[i * 3 + 1] = 1.45;
-        arr[i * 3 + 2] = 2.2 + (Math.random() - 0.5) * 0.18;
+      if (arr[i * 3 + 1] > 2.65) {
+        // Respawn exactly over the coffee surface, not at a detached world-space point.
+        arr[i * 3] = (Math.random() - 0.5) * 0.34;
+        arr[i * 3 + 1] = 0.58;
+        arr[i * 3 + 2] = 3.12 + (Math.random() - 0.5) * 0.22;
       }
     }
     posAttr.needsUpdate = true;
@@ -293,7 +294,7 @@ export function SteamParticles({ count = 60 }: ParticleSystemProps) {
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.2}
+        size={0.14}
         color="#f5ebe0"
         transparent
         opacity={0}
