@@ -112,41 +112,6 @@ export function CinematicHero() {
         </div>
       </motion.div>
 
-      {/* Quiet value strip inspired by the reference, kept separate from the hero copy */}
-      <motion.div
-        className="absolute inset-x-0 bottom-0 z-20 h-[54px] w-full border-t border-[#d4aa63]/16 bg-[#080604]/78 backdrop-blur-[3px] md:h-[58px]"
-        style={{ opacity: contentOpacity }}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.7, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="flex h-full w-full items-center justify-start px-10 md:px-14 lg:px-20">
-          {[
-            { icon: Coffee, top: 'PREMIUM', bottom: 'COFFEE' },
-            { icon: Croissant, top: 'FRESH', bottom: 'BAKED TREATS' },
-            { icon: Sprout, top: 'COZY &', bottom: 'RELAXING SPACE' },
-          ].map(({ icon: Icon, top, bottom }, index) => (
-            <div
-              key={bottom}
-              className="flex min-w-0 items-center gap-2.5 px-0 sm:px-0"
-            >
-              {index > 0 && (
-                <span className="mx-5 h-5 w-px shrink-0 bg-[#d4aa63]/35 sm:mx-7" />
-              )}
-              <Icon
-                aria-hidden="true"
-                size={16}
-                strokeWidth={1.5}
-                className="shrink-0 text-[#e7bd72]"
-              />
-              <span className="min-w-0 font-mono-label text-[6px] leading-[1.45] tracking-[0.1em] text-[#f7efe5]/78 sm:text-[7px] lg:text-[7px]">
-                <span className="block whitespace-nowrap">{top}</span>
-                <span className="block whitespace-nowrap">{bottom}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      </motion.div>
     </section>
   );
 }
