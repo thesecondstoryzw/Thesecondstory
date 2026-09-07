@@ -58,31 +58,101 @@ export function RoastingParticles({ count = 100 }: ParticleSystemProps) {
 
 export function GrindingParticles({ count = 120 }: ParticleSystemProps) {
   const ref = useRef<THREE.Points>(null);
-  const outlet = useMemo(() => new THREE.Vector3(1.85, -0.25, 3.9), []);
-  const { positions, velocities, drift } = useMemo(() => {
-    const positions = new Float32Array(count * 3); const velocities = new Float32Array(count * 3); const drift = new Float32Array(count);
+
+  // Calibrated to the grinder's hopper in world space. Beans start across the
+  // open top of the hopper and converge on its bottom-center throat.
+  const hopperCenter = useMemo(() => new THREE.Vector3(1.85, 0.34, 3.05), []);
+  const grinderThroat = useMemo(() => new THREE.Vector3(1.85, -0.30, 3.05), []);
+
+  const { positions, progress, startX, startZ, phases } = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const progress = new Float32Array(count);
+    const startX = new Float32Array(count);
+    const startZ = new Float32Array(count);
+    const phases = new Float32Array(count);
+
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = outlet.x + (Math.random() - 0.5) * 0.12; positions[i * 3 + 1] = outlet.y; positions[i * 3 + 2] = outlet.z + (Math.random() - 0.5) * 0.12;
-      velocities[i * 3] = (Math.random() - 0.5) * 0.04; velocities[i * 3 + 1] = -(Math.random() * 0.055 + 0.025); velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.025; drift[i] = Math.random() * Math.PI * 2;
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.sqrt(Math.random()) * 0.28;
+      startX[i] = Math.cos(angle) * radius;
+      startZ[i] = Math.sin(angle) * radius * 0.62;
+      progress[i] = Math.random();
+      phases[i] = Math.random() * Math.PI * 2;
+
+      const t = progress[i];
+      const funnel = t * t;
+      positions[i * 3] = hopperCenter.x + startX[i] * (1 - funnel);
+      positions[i * 3 + 1] = THREE.MathUtils.lerp(hopperCenter.y, grinderThroat.y, t);
+      positions[i * 3 + 2] = hopperCenter.z + startZ[i] * (1 - funnel);
     }
-    return { positions, velocities, drift };
-  }, [count, outlet]);
+
+    return { positions, progress, startX, startZ, phases };
+  }, [count, hopperCenter, grinderThroat]);
 
   useFrame((state, delta) => {
     if (!ref.current) return;
-    const p = scrollProgressRef.current; const intensity = smoothstep(0.46, 0.49, p) * (1 - smoothstep(0.54, 0.585, p));
+
+    const p = scrollProgressRef.current;
+    const intensity =
+      smoothstep(0.46, 0.49, p) *
+      (1 - smoothstep(0.54, 0.585, p));
+
     (ref.current.material as THREE.PointsMaterial).opacity = intensity * 0.72;
-    const attr = ref.current.geometry.attributes.position as THREE.BufferAttribute; const arr = attr.array as Float32Array;
+
+    const attr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
+    const arr = attr.array as Float32Array;
+
     for (let i = 0; i < count; i++) {
       if (intensity > 0.01) {
-        arr[i * 3] += (velocities[i * 3] + Math.sin(state.clock.elapsedTime * 4 + drift[i]) * 0.004) * delta * 60; arr[i * 3 + 1] += velocities[i * 3 + 1] * delta * 60; arr[i * 3 + 2] += velocities[i * 3 + 2] * delta * 60;
-        if (arr[i * 3 + 1] < -2.5 || Math.random() < delta * 0.08) { arr[i * 3] = outlet.x + (Math.random() - 0.5) * 0.12; arr[i * 3 + 1] = outlet.y; arr[i * 3 + 2] = outlet.z + (Math.random() - 0.5) * 0.12; }
-      } else { arr[i * 3] = outlet.x + (Math.random() - 0.5) * 0.12; arr[i * 3 + 1] = outlet.y; arr[i * 3 + 2] = outlet.z + (Math.random() - 0.5) * 0.12; }
+        // One-way gravity-driven funnel motion: wide at the top, tight at the throat.
+        progress[i] += delta * (0.55 + (i % 7) * 0.035);
+
+        if (progress[i] >= 1) {
+          progress[i] = 0;
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.sqrt(Math.random()) * 0.28;
+          startX[i] = Math.cos(angle) * radius;
+          startZ[i] = Math.sin(angle) * radius * 0.62;
+        }
+      } else {
+        // Keep the effect reset while the grinder is inactive so no stray stream
+        // remains visible before or after the grinding chapter.
+        progress[i] = Math.random();
+      }
+
+      const t = progress[i];
+      const funnel = t * t;
+      const wobble = (1 - funnel) * 0.012;
+
+      arr[i * 3] =
+        hopperCenter.x +
+        startX[i] * (1 - funnel) +
+        Math.sin(state.clock.elapsedTime * 5 + phases[i]) * wobble;
+      arr[i * 3 + 1] = THREE.MathUtils.lerp(hopperCenter.y, grinderThroat.y, t);
+      arr[i * 3 + 2] =
+        hopperCenter.z +
+        startZ[i] * (1 - funnel) +
+        Math.cos(state.clock.elapsedTime * 4 + phases[i]) * wobble;
     }
+
     attr.needsUpdate = true;
   });
 
-  return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} /></bufferGeometry><pointsMaterial size={0.05} color="#4b2815" transparent opacity={0} sizeAttenuation depthWrite={false} /></points>;
+  return (
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.045}
+        color="#4b2815"
+        transparent
+        opacity={0}
+        sizeAttenuation
+        depthWrite={false}
+      />
+    </points>
+  );
 }
 
 export function BrewingParticles({ count = 120 }: ParticleSystemProps) {
