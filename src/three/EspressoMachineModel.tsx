@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { clamp, lerp, scrollProgressRef, smoothstep } from '@/three/scrollState';
+import { clamp, lerp, sceneProgressRef, smoothstep } from '@/three/scrollState';
 
 const MODEL_PATH = '/models/espresso-machine.glb';
 useGLTF.preload(MODEL_PATH);
@@ -34,7 +34,7 @@ export function EspressoMachineModel() {
 
   useFrame((state, delta) => {
     if (!group.current) return;
-    const p = scrollProgressRef.current;
+    const p = sceneProgressRef.current;
     // Do not overlap the outgoing grinder with the incoming espresso machine.
     const enter = smoothstep(0.575, 0.625, p);
     const leave = 1 - smoothstep(0.72, 0.77, p);
