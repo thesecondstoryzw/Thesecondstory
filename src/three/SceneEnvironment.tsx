@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { scrollProgressRef, smoothstep, mapRange, lerp } from '@/three/scrollState';
+import { sceneProgressRef, smoothstep, mapRange, lerp } from '@/three/scrollState';
 
 export function ScrollCamera() {
   const { camera } = useThree();
@@ -9,7 +9,7 @@ export function ScrollCamera() {
   const targetLook = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame((_, delta) => {
-    const p = scrollProgressRef.current;
+    const p = sceneProgressRef.current;
     const smoothing = 1 - Math.pow(0.001, delta);
 
     if (p < 0.06) {
@@ -48,7 +48,7 @@ export function SceneLighting() {
   const rimRef = useRef<THREE.PointLight>(null);
 
   useFrame(() => {
-    const p = scrollProgressRef.current;
+    const p = sceneProgressRef.current;
     const roastIntensity = smoothstep(0.24, 0.34, p) * (1 - smoothstep(0.36, 0.42, p));
     const grindIntensity = smoothstep(0.42, 0.47, p) * (1 - smoothstep(0.53, 0.59, p));
     if (ambientRef.current) ambientRef.current.intensity = 0.3 + smoothstep(0.72, 0.84, p) * 0.3 - roastIntensity * 0.12 - grindIntensity * 0.08;
@@ -78,7 +78,7 @@ export function SceneBackground() {
   const { scene } = useThree();
   const colorRef = useRef(new THREE.Color('#0d0805'));
   useFrame(() => {
-    const p = scrollProgressRef.current;
+    const p = sceneProgressRef.current;
     const target = colorRef.current;
     if (p < 0.06) target.setRGB(0.05, 0.03, 0.02);
     else if (p < 0.24) target.setRGB(0.05, 0.03, 0.02);
