@@ -35,7 +35,7 @@ export function CupModel() {
     const box = new THREE.Box3().setFromObject(copy);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-    const targetHeight = 1.85;
+    const targetHeight = 1.62;
     const modelScale = targetHeight / Math.max(size.y, 0.001);
 
     return {
@@ -59,16 +59,16 @@ export function CupModel() {
 
     const target = new THREE.Vector3(
       lerp(0.35, 0, settle),
-      -0.95 + Math.sin(state.clock.elapsedTime * 1.1) * 0.01 * settle,
-      lerp(3.45, 3.0, settle)
+      -1.05 + Math.sin(state.clock.elapsedTime * 1.1) * 0.01 * settle,
+      lerp(3.65, 3.18, settle)
     );
 
     const smoothing = 1 - Math.pow(0.001, delta);
     group.current.position.lerp(target, smoothing);
-    group.current.rotation.x = lerp(group.current.rotation.x, -0.28, smoothing);
+    group.current.rotation.x = lerp(group.current.rotation.x, -0.16, smoothing);
     group.current.rotation.y = lerp(
       group.current.rotation.y,
-      HANDLE_LEFT_ROTATION + lerp(-0.05, 0.05, settle),
+      HANDLE_LEFT_ROTATION + lerp(-0.02, 0.02, settle),
       smoothing
     );
     group.current.rotation.z = lerp(
