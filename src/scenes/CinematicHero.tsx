@@ -15,7 +15,9 @@ export function CinematicHero() {
   const imageY = useTransform(scrollYProgress, [0, 1], [0, 90]);
   const contentY = useTransform(scrollYProgress, [0, 0.72], [0, -44]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0]);
-  const darkOpacity = useTransform(scrollYProgress, [0, 1], [0.28, 0.72]);
+  // Keep the same cinematic image, with the soft dark treatment from the reference
+  // so the copy and CTA stay readable without flattening the photograph.
+  const darkOpacity = useTransform(scrollYProgress, [0, 1], [0.42, 0.68]);
 
   return (
     <section
@@ -103,6 +105,19 @@ export function CinematicHero() {
             From a single bean to a moment shared. From a moment to a memory.
             From a memory to a story worth telling.
           </motion.p>
+
+          <motion.a
+            href="#experience"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 1.42, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={reduced ? undefined : { y: -2, scale: 1.02 }}
+            whileTap={reduced ? undefined : { scale: 0.98 }}
+            className="mt-7 inline-flex w-fit items-center gap-3 rounded-full bg-[#f0cd8c] px-7 py-4 font-body text-[11px] font-semibold uppercase tracking-[0.08em] text-[#2a180d] shadow-[0_12px_36px_rgba(0,0,0,0.28)] transition-colors hover:bg-[#f6d99f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0cd8c]/80"
+          >
+            Explore our menu
+            <span aria-hidden="true" className="text-base leading-none">→</span>
+          </motion.a>
         </div>
       </motion.div>
 
