@@ -3,6 +3,8 @@ import { Suspense } from 'react';
 import * as THREE from 'three';
 import { BeanModel } from '@/three/BeanModel';
 import { GrinderModel } from '@/three/GrinderModel';
+import { EspressoMachineModel } from '@/three/EspressoMachineModel';
+import { CupModel } from '@/three/CupModel';
 import {
   AtmosphereParticles,
   RoastingParticles,
@@ -41,6 +43,8 @@ export function ExperienceCanvas({ isMobile }: ExperienceCanvasProps) {
 
         <BeanModel />
         <GrinderModel />
+        <EspressoMachineModel />
+        <CupModel />
 
         <AtmosphereParticles count={isMobile ? 100 : 200} />
         {!isMobile && (
