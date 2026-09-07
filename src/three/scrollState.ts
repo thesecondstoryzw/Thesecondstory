@@ -2,6 +2,11 @@ import { useRef } from 'react';
 
 export const scrollProgressRef = { current: 0 };
 
+// Raw progress is driven directly by the browser scroll. 3D objects use this
+// second value so rapid wheel/trackpad updates do not make the composition jump
+// when the chapter copy changes.
+export const sceneProgressRef = { current: 0 };
+
 
 export function useScrollProgress() {
   return scrollProgressRef;
