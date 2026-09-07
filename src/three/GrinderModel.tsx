@@ -11,7 +11,9 @@ export function GrinderModel() {
   const group = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH) as unknown as { scene: THREE.Group };
 
-  const cloned = useMemo(() => {
+  // Normalize the imported asset from its real bounds so it cannot suddenly
+  // dominate the frame because of arbitrary GLB export units.
+  const { cloned, offset, scale } = useMemo(() => {
     const copy = scene.clone(true);
     copy.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -22,7 +24,22 @@ export function GrinderModel() {
           : child.material.clone();
       }
     });
-    return copy;
+
+    const box = new THREE.Box3().setFromObject(copy);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const targetHeight = 2.15;
+    const modelScale = targetHeight / Math.max(size.y, 0.001);
+
+    return {
+      cloned: copy,
+      offset: new THREE.Vector3(
+        -center.x * modelScale,
+        -box.min.y * modelScale,
+        -center.z * modelScale
+      ),
+      scale: modelScale,
+    };
   }, [scene]);
 
   useFrame((state, delta) => {
@@ -42,10 +59,9 @@ export function GrinderModel() {
         Math.sin(state.clock.elapsedTime * 23) * 0.004);
 
     const settle = smoothstep(0.32, 0.40, p);
-    const targetScale = 1.18;
     const target = new THREE.Vector3(
       vibration,
-      -0.82 + vibration * 0.25,
+      -0.92 + vibration * 0.25,
       3.15
     );
 
@@ -61,11 +77,8 @@ export function GrinderModel() {
       Math.sin(state.clock.elapsedTime * 45) * active * 0.004,
       smoothing
     );
-    group.current.scale.setScalar(
-      lerp(group.current.scale.x, targetScale, smoothing)
-    );
-
     group.current.visible = visibility > 0.01;
+
     group.current.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
@@ -78,8 +91,10 @@ export function GrinderModel() {
   });
 
   return (
-    <group ref={group} position={[0, -0.82, 3.15]} scale={1.18} visible={false}>
-      <primitive object={cloned} />
+    <group ref={group} visible={false}>
+      <group scale={scale} position={offset}>
+        <primitive object={cloned} />
+      </group>
     </group>
   );
 }
