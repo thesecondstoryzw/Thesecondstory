@@ -64,7 +64,7 @@ export function CinematicHero() {
       />
 
       <motion.div
-        className="relative z-10 flex h-full items-center px-6 pt-20 md:px-14 lg:px-20"
+        className="relative z-10 flex h-full items-end px-6 pb-[76px] pt-20 md:px-14 md:pb-[82px] lg:px-20"
         style={{
           y: reduced ? 0 : contentY,
           opacity: contentOpacity,
@@ -94,7 +94,7 @@ export function CinematicHero() {
             initial={{ scaleX: 0, opacity: 0 }}
             animate={{ scaleX: 1, opacity: 1 }}
             transition={{ duration: 1.1, delay: 1.05, ease: [0.22, 1, 0.36, 1] }}
-            className="my-7 h-px w-16 origin-left bg-[#d4aa63]/55"
+            className="my-4 h-px w-12 origin-left bg-[#d4aa63]/55"
           />
 
           <motion.a
@@ -104,7 +104,7 @@ export function CinematicHero() {
             transition={{ duration: 0.9, delay: 1.42, ease: [0.22, 1, 0.36, 1] }}
             whileHover={reduced ? undefined : { y: -2, scale: 1.02 }}
             whileTap={reduced ? undefined : { scale: 0.98 }}
-            className="mt-2 inline-flex w-fit items-center gap-3 rounded-full bg-[#f0cd8c] px-7 py-4 font-body text-[11px] font-semibold uppercase tracking-[0.08em] text-[#2a180d] shadow-[0_12px_36px_rgba(0,0,0,0.28)] transition-colors hover:bg-[#f6d99f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0cd8c]/80"
+            className="mt-1 inline-flex w-fit items-center gap-2.5 rounded-full bg-[#f0cd8c] px-5 py-2.5 font-body text-[9px] font-semibold uppercase tracking-[0.08em] text-[#2a180d] shadow-[0_8px_22px_rgba(0,0,0,0.32)] transition-colors hover:bg-[#f6d99f] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f0cd8c]/80"
           >
             Explore our menu
             <span aria-hidden="true" className="text-base leading-none">→</span>
@@ -114,13 +114,13 @@ export function CinematicHero() {
 
       {/* Quiet value strip inspired by the reference, kept separate from the hero copy */}
       <motion.div
-        className="absolute inset-x-0 bottom-0 z-20 w-full border-t border-[#d4aa63]/20 bg-[#080604]/72 backdrop-blur-[3px]"
+        className="absolute inset-x-0 bottom-0 z-20 h-[54px] w-full border-t border-[#d4aa63]/16 bg-[#080604]/78 backdrop-blur-[3px] md:h-[58px]"
         style={{ opacity: contentOpacity }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.7, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="flex w-full items-stretch justify-between px-6 py-5 md:px-12 lg:px-20">
+        <div className="flex h-full w-full items-center justify-start px-10 md:px-14 lg:px-20">
           {[
             { icon: Coffee, top: 'PREMIUM', bottom: 'COFFEE' },
             { icon: Croissant, top: 'FRESH', bottom: 'BAKED TREATS' },
@@ -128,18 +128,18 @@ export function CinematicHero() {
           ].map(({ icon: Icon, top, bottom }, index) => (
             <div
               key={bottom}
-              className="flex min-w-0 flex-1 items-center justify-center gap-4 px-4 sm:px-8 lg:px-12"
+              className="flex min-w-0 items-center gap-2.5 px-0 sm:px-0"
             >
               {index > 0 && (
-                <span className="mr-3 hidden h-9 w-px shrink-0 bg-[#d4aa63]/40 sm:block" />
+                <span className="mx-5 h-5 w-px shrink-0 bg-[#d4aa63]/35 sm:mx-7" />
               )}
               <Icon
                 aria-hidden="true"
-                size={28}
+                size={16}
                 strokeWidth={1.5}
                 className="shrink-0 text-[#e7bd72]"
               />
-              <span className="min-w-0 font-mono-label text-[8px] leading-[1.5] tracking-[0.14em] text-[#f7efe5]/82 sm:text-[9px] lg:text-[10px]">
+              <span className="min-w-0 font-mono-label text-[6px] leading-[1.45] tracking-[0.1em] text-[#f7efe5]/78 sm:text-[7px] lg:text-[7px]">
                 <span className="block whitespace-nowrap">{top}</span>
                 <span className="block whitespace-nowrap">{bottom}</span>
               </span>
