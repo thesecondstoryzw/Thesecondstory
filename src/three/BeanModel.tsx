@@ -2,7 +2,7 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { scrollProgressRef, mapRange, smoothstep } from '@/three/scrollState';
+import { sceneProgressRef, mapRange, smoothstep } from '@/three/scrollState';
 
 const MODEL_PATH = '/models/hero-coffee-bean.glb';
 useGLTF.preload(MODEL_PATH);
@@ -36,7 +36,7 @@ export function BeanModel() {
 
   useFrame((_, delta) => {
     if (!group.current) return;
-    const p = scrollProgressRef.current;
+    const p = sceneProgressRef.current;
     let targetScale = 0.42;
     let visibility = 0;
 
