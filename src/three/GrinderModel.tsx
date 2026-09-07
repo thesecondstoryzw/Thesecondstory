@@ -80,7 +80,8 @@ export function GrinderModel() {
       smoothing
     );
 
-    const scale = 2.6;
+    // Product-sized framing: keep the grinder readable without dominating the camera.
+    const scale = 1.65;
     group.current.scale.lerp(
       new THREE.Vector3(scale, scale, scale),
       smoothing
@@ -101,7 +102,7 @@ export function GrinderModel() {
   });
 
   return (
-    <group ref={group} position={[0, -1.05, 3]} scale={2.6} visible={false}>
+    <group ref={group} position={[0, -1.05, 3]} scale={1.65} visible={false}>
       <primitive object={cloned} />
       <pointLight
         position={[0, -0.25, 1.25]}
