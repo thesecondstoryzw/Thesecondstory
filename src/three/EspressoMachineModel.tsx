@@ -64,8 +64,8 @@ export function EspressoMachineModel() {
 
   return (
     <group ref={group} visible={false}>
-      {/* The uploaded asset's local up axis is inverted in the supplied GLB. Correct it once here. */}
-      <group scale={scale} position={offset} rotation={[0, 0, Math.PI]}>
+      {/* Preserve the model's authored orientation; a 180° Z rotation turns the machine upside down. */}
+      <group scale={scale} position={offset}>
         <primitive object={cloned} />
       </group>
       <pointLight position={[0.3, 1.05, 1.3]} color="#d79a58" intensity={1.1} distance={5} decay={2} />
