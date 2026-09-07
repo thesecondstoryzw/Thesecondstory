@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Suspense } from 'react';
 import * as THREE from 'three';
 import { BeanModel } from '@/three/BeanModel';
@@ -13,6 +13,17 @@ import {
   SteamParticles,
 } from '@/three/ParticleSystems';
 import { ScrollCamera, SceneLighting, SceneBackground } from '@/three/SceneEnvironment';
+import { scrollProgressRef, sceneProgressRef } from '@/three/scrollState';
+
+function SceneProgressDriver() {
+  // Run before the scene models/camera. This gives every 3D element the same
+  // damped scroll signal and removes tiny position jumps at chapter boundaries.
+  useFrame((_, delta) => {
+    const smoothing = 1 - Math.exp(-8 * delta);
+    sceneProgressRef.current += (scrollProgressRef.current - sceneProgressRef.current) * smoothing;
+  }, -100);
+  return null;
+}
 
 interface ExperienceCanvasProps {
   isMobile: boolean;
@@ -37,6 +48,7 @@ export function ExperienceCanvas({ isMobile }: ExperienceCanvasProps) {
       }}
     >
       <Suspense fallback={null}>
+        <SceneProgressDriver />
         <SceneBackground />
         <SceneLighting />
         <ScrollCamera />
