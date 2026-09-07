@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { Coffee, Croissant, Sprout } from 'lucide-react';
 
 export function CinematicHero() {
   const ref = useRef<HTMLElement>(null);
@@ -76,7 +77,7 @@ export function CinematicHero() {
             transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="font-mono-label mb-5 text-[8px] text-[#d6a96a]/85 md:text-[10px]"
           >
-            EVERY CUP HAS A
+            EVERY CUP HAS
           </motion.p>
 
           <motion.h1
@@ -111,19 +112,40 @@ export function CinematicHero() {
         </div>
       </motion.div>
 
+      {/* Quiet value strip inspired by the reference, kept separate from the hero copy */}
       <motion.div
-        className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2"
+        className="absolute inset-x-0 bottom-0 z-20 border-t border-[#d4aa63]/10 bg-[#080604]/58 backdrop-blur-[2px]"
         style={{ opacity: contentOpacity }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.7, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
-        <span className="font-mono-label text-[7px] text-[#f7efe5]/40">SCROLL TO BEGIN</span>
-        <motion.div
-          animate={reduced ? undefined : { y: [0, 8, 0] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-          className="h-8 w-px bg-gradient-to-b from-[#d4aa63]/70 to-transparent"
-        />
+        <div className="mx-auto flex w-full max-w-[920px] items-stretch justify-center px-5 py-4 md:px-8">
+          {[
+            { icon: Coffee, top: 'PREMIUM', bottom: 'COFFEE' },
+            { icon: Croissant, top: 'FRESH', bottom: 'BAKED TREATS' },
+            { icon: Sprout, top: 'COZY &', bottom: 'RELAXING SPACE' },
+          ].map(({ icon: Icon, top, bottom }, index) => (
+            <div
+              key={bottom}
+              className="flex min-w-0 flex-1 items-center justify-center gap-3 px-3 sm:px-6"
+            >
+              {index > 0 && (
+                <span className="mr-1 hidden h-7 w-px shrink-0 bg-[#d4aa63]/45 sm:block" />
+              )}
+              <Icon
+                aria-hidden="true"
+                size={22}
+                strokeWidth={1.5}
+                className="shrink-0 text-[#e1b86e]"
+              />
+              <span className="min-w-0 font-mono-label text-[6px] leading-[1.45] tracking-[0.12em] text-[#f7efe5]/72 sm:text-[7px]">
+                <span className="block whitespace-nowrap">{top}</span>
+                <span className="block whitespace-nowrap">{bottom}</span>
+              </span>
+            </div>
+          ))}
+        </div>
       </motion.div>
     </section>
   );
