@@ -114,13 +114,13 @@ export function CinematicHero() {
 
       {/* Quiet value strip inspired by the reference, kept separate from the hero copy */}
       <motion.div
-        className="absolute inset-x-0 bottom-0 z-20 border-t border-[#d4aa63]/10 bg-[#080604]/58 backdrop-blur-[2px]"
+        className="absolute inset-x-0 bottom-0 z-20 w-full border-t border-[#d4aa63]/20 bg-[#080604]/72 backdrop-blur-[3px]"
         style={{ opacity: contentOpacity }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.7, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="mx-auto flex w-full max-w-[920px] items-stretch justify-center px-5 py-4 md:px-8">
+        <div className="flex w-full items-stretch justify-between px-6 py-5 md:px-12 lg:px-20">
           {[
             { icon: Coffee, top: 'PREMIUM', bottom: 'COFFEE' },
             { icon: Croissant, top: 'FRESH', bottom: 'BAKED TREATS' },
@@ -128,18 +128,18 @@ export function CinematicHero() {
           ].map(({ icon: Icon, top, bottom }, index) => (
             <div
               key={bottom}
-              className="flex min-w-0 flex-1 items-center justify-center gap-3 px-3 sm:px-6"
+              className="flex min-w-0 flex-1 items-center justify-center gap-4 px-4 sm:px-8 lg:px-12"
             >
               {index > 0 && (
-                <span className="mr-1 hidden h-7 w-px shrink-0 bg-[#d4aa63]/45 sm:block" />
+                <span className="mr-3 hidden h-9 w-px shrink-0 bg-[#d4aa63]/40 sm:block" />
               )}
               <Icon
                 aria-hidden="true"
-                size={22}
+                size={28}
                 strokeWidth={1.5}
-                className="shrink-0 text-[#e1b86e]"
+                className="shrink-0 text-[#e7bd72]"
               />
-              <span className="min-w-0 font-mono-label text-[6px] leading-[1.45] tracking-[0.12em] text-[#f7efe5]/72 sm:text-[7px]">
+              <span className="min-w-0 font-mono-label text-[8px] leading-[1.5] tracking-[0.14em] text-[#f7efe5]/82 sm:text-[9px] lg:text-[10px]">
                 <span className="block whitespace-nowrap">{top}</span>
                 <span className="block whitespace-nowrap">{bottom}</span>
               </span>
