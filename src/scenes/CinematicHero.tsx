@@ -1,9 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ExperienceCanvas } from '@/three/ExperienceCanvas';
-import { scrollProgressRef } from '@/three/scrollState';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { heroImage } from '@/data/images';
 
 export function CinematicHero() {
   const ref = useRef<HTMLDivElement>(null);
@@ -30,7 +27,7 @@ export function CinematicHero() {
     <section
       id="hero"
       ref={ref}
-      className="relative h-screen w-full overflow-hidden bg-[#0d0805]"
+      className="relative h-screen w-full overflow-hidden bg-[#080604]"
     >
       {/* Background — coffee shop image with cinematic treatment */}
       <motion.div
@@ -44,14 +41,15 @@ export function CinematicHero() {
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${heroImage.url})`,
+            backgroundImage: 'url("/models/Hero%20image.png")',
             y: reduced ? 0 : bgY,
-            filter: 'brightness(0.5) contrast(1.15) saturate(0.9)',
+            backgroundPosition: 'center center',
+            filter: 'brightness(0.68) contrast(1.08) saturate(0.88)',
           }}
         />
         {/* Cinematic dark overlay */}
         <motion.div
-          className="absolute inset-0 bg-[#0d0805]"
+          className="absolute inset-0 bg-[#080604]"
           style={{ opacity: overlayOpacity }}
         />
         {/* Warm gradient */}
@@ -59,11 +57,11 @@ export function CinematicHero() {
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse at 60% 40%, rgba(201,160,78,0.08) 0%, transparent 60%)',
+              'radial-gradient(ellipse at 70% 35%, rgba(183,115,57,0.16) 0%, transparent 45%), radial-gradient(ellipse at 20% 75%, rgba(57,30,16,0.28) 0%, transparent 55%)',
           }}
         />
         {/* Bottom fade */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0805] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080604] via-[#080604]/25 to-transparent" />
       </motion.div>
 
       {/* Hero content */}
@@ -78,7 +76,7 @@ export function CinematicHero() {
           initial={{ opacity: 0, letterSpacing: '0.6em' }}
           animate={{ opacity: 1, letterSpacing: '0.35em' }}
           transition={{ duration: 2, delay: 0.6, ease: [0.7, 0, 0.3, 1] }}
-          className="font-mono-label text-[9px] md:text-[11px] text-[#c9a04e] mb-6"
+          className="font-mono-label text-[9px] md:text-[11px] text-[#d49a61] mb-6"
         >
           Harare · Zimbabwe
         </motion.div>
@@ -87,7 +85,7 @@ export function CinematicHero() {
           initial={{ opacity: 0, y: 50, filter: 'blur(20px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 2.2, delay: 0.3, ease: [0.7, 0, 0.3, 1] }}
-          className="font-serif-display text-5xl md:text-7xl lg:text-8xl text-[#f5ebe0] text-center leading-[1.05] px-6"
+          className="font-serif-display text-5xl md:text-7xl lg:text-8xl text-[#f3e6d8] text-center leading-[1.05] px-6"
         >
           The Second
           <br />
@@ -128,7 +126,7 @@ export function CinematicHero() {
       </motion.div>
 
       {/* Cinematic letterbox bars */}
-      <div className="absolute top-0 left-0 right-0 h-[4vh] bg-[#0d0805] z-20 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[4vh] bg-[#080604] z-20 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-[4vh] bg-[#0d0805] z-20 pointer-events-none" />
     </section>
   );
