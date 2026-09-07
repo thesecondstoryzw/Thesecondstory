@@ -1,133 +1,125 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 export function CinematicHero() {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion();
-  const [videoLoaded, setVideoLoaded] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
   });
 
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.2]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const heroBlur = useTransform(scrollYProgress, [0, 0.5], [0, 12]);
-  const filterBlur = useTransform(heroBlur, (v) => `blur(${v}px)`);
-  const textY = useTransform(scrollYProgress, [0, 0.5], [0, -60]);
-  const overlayDarken = useTransform(scrollYProgress, [0, 0.5], [0.4, 0.8]);
-  const overlayOpacity = useTransform(overlayDarken, (v) => v);
-
-  // Parallax for hero image
-  const bgY = useTransform(scrollYProgress, [0, 1], [0, 150]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1.03, 1.12]);
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, 90]);
+  const contentY = useTransform(scrollYProgress, [0, 0.72], [0, -44]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0]);
+  const darkOpacity = useTransform(scrollYProgress, [0, 1], [0.28, 0.72]);
 
   return (
     <section
       id="hero"
       ref={ref}
-      className="relative h-screen w-full overflow-hidden bg-[#080604]"
+      className="relative min-h-[100svh] h-[100svh] w-full overflow-hidden bg-[#090604]"
     >
-      {/* Background — coffee shop image with cinematic treatment */}
       <motion.div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0"
         style={{
-          scale: reduced ? 1 : heroScale,
-          opacity: heroOpacity,
-          filter: filterBlur,
+          scale: reduced ? 1 : imageScale,
+          y: reduced ? 0 : imageY,
         }}
       >
-        <motion.div
-          className="absolute inset-0 bg-cover bg-center"
+        <div
+          className="absolute inset-0 bg-cover bg-no-repeat"
           style={{
             backgroundImage: 'url("/models/Hero%20image.png")',
-            y: reduced ? 0 : bgY,
-            backgroundPosition: '42% center',
-            filter: 'brightness(0.68) contrast(1.08) saturate(0.88)',
+            backgroundPosition: '34% center',
+            filter: 'brightness(0.82) contrast(1.08) saturate(0.92)',
           }}
         />
-        {/* Cinematic dark overlay */}
-        <motion.div
-          className="absolute inset-0 bg-[#080604]"
-          style={{ opacity: overlayOpacity }}
-        />
-        {/* Warm gradient */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse at 70% 35%, rgba(183,115,57,0.16) 0%, transparent 45%), radial-gradient(ellipse at 20% 75%, rgba(57,30,16,0.28) 0%, transparent 55%)',
-          }}
-        />
-        {/* Bottom fade */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080604] via-[#080604]/25 to-transparent" />
       </motion.div>
 
-      {/* Hero content */}
+      {/* Cinematic grading: readable, but never a flat black overlay */}
       <motion.div
-        className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+        className="absolute inset-0 bg-[#080604]"
+        style={{ opacity: darkOpacity }}
+      />
+      <div
+        className="absolute inset-0"
         style={{
-          opacity: heroOpacity,
-          y: reduced ? 0 : textY,
+          background:
+            'linear-gradient(90deg, rgba(8,6,4,0.56) 0%, rgba(8,6,4,0.18) 38%, rgba(8,6,4,0.10) 64%, rgba(8,6,4,0.38) 100%), linear-gradient(180deg, rgba(8,6,4,0.22) 0%, transparent 34%, rgba(8,6,4,0.12) 66%, rgba(8,6,4,0.82) 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at 72% 30%, rgba(203,139,73,0.13), transparent 44%), radial-gradient(ellipse at 8% 52%, rgba(31,15,8,0.22), transparent 42%)',
+        }}
+      />
+
+      <motion.div
+        className="relative z-10 flex h-full items-center px-6 pt-20 md:px-14 lg:px-20"
+        style={{
+          y: reduced ? 0 : contentY,
+          opacity: contentOpacity,
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, letterSpacing: '0.6em' }}
-          animate={{ opacity: 1, letterSpacing: '0.35em' }}
-          transition={{ duration: 2, delay: 0.6, ease: [0.7, 0, 0.3, 1] }}
-          className="font-mono-label text-[9px] md:text-[11px] text-[#d49a61] mb-6"
-        >
-          Harare · Zimbabwe
-        </motion.div>
+        <div className="w-full max-w-[780px]">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="font-mono-label mb-5 text-[8px] text-[#d6a96a]/85 md:text-[10px]"
+          >
+            EVERY CUP HAS A
+          </motion.p>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 50, filter: 'blur(20px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{ duration: 2.2, delay: 0.3, ease: [0.7, 0, 0.3, 1] }}
-          className="font-serif-display text-5xl md:text-7xl lg:text-8xl text-[#f3e6d8] text-center leading-[1.05] px-6"
-        >
-          The Second
-          <br />
-          <span className="italic text-[#c9a04e]">Story</span>
-        </motion.h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 42, filter: 'blur(14px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 1.45, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="font-serif-display max-w-full text-[clamp(4rem,10vw,9.5rem)] leading-[0.82] tracking-[-0.055em] text-[#f7efe5]"
+          >
+            <span className="block whitespace-nowrap">A Second</span>
+            <span className="mt-[0.08em] block pl-[0.18em] italic text-[#d4aa63]">Story</span>
+          </motion.h1>
 
-        <motion.div
-          initial={{ opacity: 0, width: 0 }}
-          animate={{ opacity: 1, width: '60px' }}
-          transition={{ duration: 1, delay: 1.4, ease: [0.7, 0, 0.3, 1] }}
-          className="h-px bg-[#c9a04e]/40 my-8"
-        />
+          <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 1.1, delay: 1.05, ease: [0.22, 1, 0.36, 1] }}
+            className="my-7 h-px w-16 origin-left bg-[#d4aa63]/55"
+          />
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 1.6, ease: [0.7, 0, 0.3, 1] }}
-          className="font-mono-label text-[9px] md:text-[11px] text-[#f5ebe0]/50 text-center"
-        >
-          Crafting Delicious Narratives
-        </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.1, delay: 1.18, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-[540px] font-body text-[clamp(1rem,1.6vw,1.35rem)] leading-relaxed text-[#f7efe5]/72"
+          >
+            From a single bean to a moment shared. From a moment to a memory.
+            From a memory to a story worth telling.
+          </motion.p>
+        </div>
       </motion.div>
 
-      {/* Scroll hint */}
       <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
-        style={{ opacity: heroOpacity }}
+        className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2"
+        style={{ opacity: contentOpacity }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2.5, duration: 1 }}
+        transition={{ delay: 2, duration: 1 }}
       >
-        <span className="font-mono-label text-[8px] text-[#f5ebe0]/30">Scroll</span>
+        <span className="font-mono-label text-[7px] text-[#f7efe5]/40">SCROLL TO BEGIN</span>
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-px h-8 bg-gradient-to-b from-[#c9a04e]/60 to-transparent"
+          animate={reduced ? undefined : { y: [0, 8, 0] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+          className="h-8 w-px bg-gradient-to-b from-[#d4aa63]/70 to-transparent"
         />
       </motion.div>
-
-      {/* Cinematic letterbox bars */}
-      <div className="absolute top-0 left-0 right-0 h-[4vh] bg-[#080604] z-20 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-[4vh] bg-[#0d0805] z-20 pointer-events-none" />
     </section>
   );
 }
