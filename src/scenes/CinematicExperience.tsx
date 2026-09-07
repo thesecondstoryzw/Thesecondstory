@@ -19,7 +19,8 @@ const chapters: Chapter[] = [
   { id: 'roasting', range: [0.28, 0.40], label: 'Chapter 03', title: 'Fire transforms\nwhat patience\nbegins.', subtitle: 'Heat. Time. First crack.', align: 'right' },
   { id: 'grinding', range: [0.40, 0.54], label: 'Chapter 04', title: 'The break.', subtitle: 'Whole becomes fragments.\nFragments become possibility.', align: 'left' },
   { id: 'extraction', range: [0.55, 0.72], label: 'Chapter 05', title: 'Pressure makes\nthe moment.', subtitle: 'Ground coffee. Hot water.\nA quiet transformation.', align: 'left' },
-  { id: 'cup', range: [0.74, 0.92], label: 'Chapter 06', title: 'One cup.\nOne story.', subtitle: 'The journey is complete.', align: 'center' },
+  // Keep the final copy out of the centered cup product shot; the cup owns the middle of frame.
+  { id: 'cup', range: [0.74, 0.92], label: 'Chapter 06', title: 'One cup.\nOne story.', subtitle: 'The journey is complete.', align: 'left' },
 ];
 
 function ChapterOverlay({ chapter, progress }: { chapter: Chapter; progress: number }) {
@@ -40,11 +41,20 @@ function ChapterOverlay({ chapter, progress }: { chapter: Chapter; progress: num
   const safeWidth =
     chapter.id === 'grinding' || chapter.id === 'extraction'
       ? 'max-w-[34rem] lg:max-w-[38rem] lg:pr-10'
+      : chapter.id === 'cup'
+      ? 'max-w-[18rem] md:max-w-[22rem] lg:max-w-[26rem] lg:pr-8'
       : 'max-w-md';
+
+  // On narrow screens, move the final chapter copy above the centered cup rather
+  // than allowing responsive type to cover the product shot.
+  const verticalClass =
+    chapter.id === 'cup'
+      ? 'justify-start pt-24 md:justify-center md:pt-0'
+      : 'justify-center';
 
   return (
     <div
-      className={`absolute inset-0 flex flex-col justify-center ${alignClass} px-6 md:px-16 lg:px-24 pointer-events-none`}
+      className={`absolute inset-0 flex flex-col ${verticalClass} ${alignClass} px-6 md:px-16 lg:px-24 pointer-events-none`}
       style={{ opacity: visibility, transform: `translateY(${offsetY}px)`, transition: 'opacity 0.25s ease' }}
     >
       <div className={safeWidth}>
