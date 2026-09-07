@@ -13,6 +13,14 @@ export function GrinderModel() {
 
   const { cloned, offset, scale } = useMemo(() => {
     const copy = scene.clone(true);
+
+    // The source GLB uses the opposite vertical axis from our scene, which made
+    // the grinder render upside down (feet above the body). Correct the asset
+    // before measuring it so the normalization offset is calculated in the
+    // final, upright orientation.
+    copy.rotation.x = Math.PI;
+    copy.updateMatrixWorld(true);
+
     copy.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
