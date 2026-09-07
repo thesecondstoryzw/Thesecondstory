@@ -2,7 +2,7 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { scrollProgressRef, mouseRef, mapRange, smoothstep } from '@/three/scrollState';
+import { scrollProgressRef, mapRange, smoothstep } from '@/three/scrollState';
 
 const MODEL_PATH = '/models/hero-coffee-bean.glb';
 
@@ -64,20 +64,22 @@ export function BeanModel() {
       targetRotation.set(0.2, mapRange(p, 0.28, 0.40, 1.1, 1.65), 0);
       targetScale = 0.5;
       visibility = 1;
-    } else if (p < 0.52) {
-      // These targets align with the grinder's base-origin bounds and hopper.
+    } else if (p < 0.475) {
+      // The bean reaches the grinder hopper, then disappears into it.
       targetPosition.set(
-        mapRange(p, 0.40, 0.52, 0.4, 0),
-        mapRange(p, 0.40, 0.52, 1.15, 1.42),
-        mapRange(p, 0.40, 0.52, 3, 3.25)
+        mapRange(p, 0.40, 0.475, 0.4, 0),
+        mapRange(p, 0.40, 0.475, 1.15, 1.42),
+        mapRange(p, 0.40, 0.475, 3, 3.25)
       );
-      targetRotation.set(0.28, mapRange(p, 0.40, 0.52, 1.65, 2.05), 0);
-      targetScale = mapRange(p, 0.40, 0.52, 0.5, 0.14);
-      visibility = 1 - smoothstep(0.49, 0.52, p);
+      targetRotation.set(0.28, mapRange(p, 0.40, 0.475, 1.65, 2.05), 0);
+      targetScale = mapRange(p, 0.40, 0.475, 0.5, 0.16);
+      visibility = 1;
     } else {
+      // Do not leave a fading bean floating over the grinder.
       targetPosition.set(0, 1.42, 3.25);
       targetRotation.set(0.28, 2.05, 0);
-      targetScale = 0.14;
+      targetScale = 0.01;
+      visibility = 0;
     }
 
     const smoothing = 1 - Math.pow(0.001, delta);
@@ -92,12 +94,12 @@ export function BeanModel() {
     );
     group.current.rotation.y = THREE.MathUtils.lerp(
       group.current.rotation.y,
-      targetRotation.y + mouseRef.x * 0.025,
+      targetRotation.y,
       smoothing
     );
     group.current.rotation.z = THREE.MathUtils.lerp(
       group.current.rotation.z,
-      targetRotation.z + mouseRef.y * 0.015,
+      targetRotation.z,
       smoothing
     );
 
