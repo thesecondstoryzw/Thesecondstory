@@ -14,13 +14,17 @@ const MODEL_PATH = '/models/cup.glb';
  */
 const HANDLE_LEFT_ROTATION = Math.PI / 2;
 
+// The uploaded model is a cup + saucer, but its GLB does not reliably expose
+// the drink surface from every material setup. A subtle procedural coffee layer
+// guarantees the final hero shot always reads as a filled cappuccino.
+
 useGLTF.preload(MODEL_PATH);
 
 export function CupModel() {
   const group = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH) as unknown as { scene: THREE.Group };
 
-  const { cloned, offset, scale } = useMemo(() => {
+  const { cloned, offset, scale, coffeeY, coffeeRadius } = useMemo(() => {
     const copy = scene.clone(true);
     copy.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -38,6 +42,12 @@ export function CupModel() {
     const targetHeight = 1.62;
     const modelScale = targetHeight / Math.max(size.y, 0.001);
 
+    // Overall bounds include the saucer. The cup rim sits near the top of the
+    // normalized model, so place the liquid just below that rim.
+    const normalizedWidth = size.x * modelScale;
+    const normalizedDepth = size.z * modelScale;
+    const rimDiameter = Math.min(normalizedWidth, normalizedDepth) * 0.62;
+
     return {
       cloned: copy,
       offset: new THREE.Vector3(
@@ -46,6 +56,8 @@ export function CupModel() {
         -center.z * modelScale
       ),
       scale: modelScale,
+      coffeeY: targetHeight * 0.945,
+      coffeeRadius: Math.max(0.28, rimDiameter * 0.5),
     };
   }, [scene]);
 
@@ -59,13 +71,15 @@ export function CupModel() {
 
     const target = new THREE.Vector3(
       lerp(0.35, 0, settle),
-      -1.05 + Math.sin(state.clock.elapsedTime * 1.1) * 0.01 * settle,
-      lerp(3.65, 3.18, settle)
+      -0.98 + Math.sin(state.clock.elapsedTime * 1.1) * 0.008 * settle,
+      lerp(3.55, 3.12, settle)
     );
 
     const smoothing = 1 - Math.pow(0.001, delta);
     group.current.position.lerp(target, smoothing);
-    group.current.rotation.x = lerp(group.current.rotation.x, -0.16, smoothing);
+    // Keep the cup almost upright. The camera, rather than an exaggerated cup
+    // tilt, reveals the drink surface like a controlled commercial product shot.
+    group.current.rotation.x = lerp(group.current.rotation.x, -0.035, smoothing);
     group.current.rotation.y = lerp(
       group.current.rotation.y,
       HANDLE_LEFT_ROTATION + lerp(-0.02, 0.02, settle),
@@ -93,6 +107,32 @@ export function CupModel() {
     <group ref={group} visible={false}>
       <group scale={scale} position={offset}>
         <primitive object={cloned} />
+      </group>
+
+      {/* Filled cappuccino surface: dark coffee body + warm crema centre. */}
+      <group position={[0, coffeeY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh castShadow receiveShadow>
+          <circleGeometry args={[coffeeRadius, 64]} />
+          <meshStandardMaterial
+            color="#2a1209"
+            roughness={0.24}
+            metalness={0.02}
+            transparent
+            opacity={0.98}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+        <mesh position={[0, 0, 0.002]}>
+          <circleGeometry args={[coffeeRadius * 0.72, 64]} />
+          <meshStandardMaterial
+            color="#8a4b1f"
+            roughness={0.36}
+            metalness={0}
+            transparent
+            opacity={0.82}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
       </group>
       <pointLight position={[-1.4, 1.9, 2.2]} color="#f4d5aa" intensity={1.7} distance={6} decay={2} />
       <pointLight position={[1.5, 0.7, 1.4]} color="#c8794a" intensity={0.9} distance={4} decay={2} />
