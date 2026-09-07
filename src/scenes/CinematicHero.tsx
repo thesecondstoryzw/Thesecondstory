@@ -43,7 +43,7 @@ export function CinematicHero() {
           style={{
             backgroundImage: 'url("/models/Hero%20image.png")',
             y: reduced ? 0 : bgY,
-            backgroundPosition: 'center center',
+            backgroundPosition: '42% center',
             filter: 'brightness(0.68) contrast(1.08) saturate(0.88)',
           }}
         />
