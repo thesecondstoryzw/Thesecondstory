@@ -62,10 +62,12 @@ export function ScrollCamera() {
       // enough to reveal the cappuccino surface without becoming a top-down shot.
       targetPos.current.set(
         0,
-        mapRange(p, 0.76, 0.84, 0.75, 1.35),
-        mapRange(p, 0.76, 0.84, 7.2, 7.7)
+        mapRange(p, 0.76, 0.84, 1.05, 1.72),
+        mapRange(p, 0.76, 0.84, 7.35, 7.55)
       );
-      targetLook.current.set(0, 0.12, 3.18);
+      // Aim just below the rim while the camera stays above it, exposing the
+      // coffee surface without turning the shot into an overhead view.
+      targetLook.current.set(0, 0.28, 3.12);
     }
 
     camera.position.x = lerp(camera.position.x, targetPos.current.x, smoothing);
