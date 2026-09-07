@@ -10,7 +10,8 @@ const MODEL_PATH = '/models/cup.glb';
  * The cup asset has its strongest texture/detail on one side.
  * Keep HANDLE_LEFT_ROTATION as the single place to tune the hero orientation.
  */
-const HANDLE_LEFT_ROTATION = Math.PI;
+// Rotate the asset so the handle sits clearly on the viewer's left in the final hero shot.
+const HANDLE_LEFT_ROTATION = -Math.PI / 2;
 
 useGLTF.preload(MODEL_PATH);
 
@@ -33,7 +34,8 @@ export function CupModel() {
     const box = new THREE.Box3().setFromObject(copy);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-    const targetHeight = 3.25;
+    // Smaller than the previous version so the full silhouette and coffee surface can breathe.
+    const targetHeight = 2.35;
     const modelScale = targetHeight / Math.max(size.y, 0.001);
 
     return {
@@ -57,16 +59,17 @@ export function CupModel() {
 
     const target = new THREE.Vector3(
       lerp(0.55, 0, settle),
-      -1.75 + Math.sin(state.clock.elapsedTime * 1.3) * 0.015 * settle,
-      lerp(2.9, 2.2, settle)
+      -1.2 + Math.sin(state.clock.elapsedTime * 1.3) * 0.015 * settle,
+      lerp(3.25, 2.65, settle)
     );
 
     const smoothing = 1 - Math.pow(0.001, delta);
     group.current.position.lerp(target, smoothing);
-    group.current.rotation.x = lerp(group.current.rotation.x, 0.02, smoothing);
+    // Slightly elevated product-shot angle so the coffee surface is visible.
+    group.current.rotation.x = lerp(group.current.rotation.x, -0.16, smoothing);
     group.current.rotation.y = lerp(
       group.current.rotation.y,
-      HANDLE_LEFT_ROTATION + lerp(-0.18, 0.12, settle),
+      HANDLE_LEFT_ROTATION + lerp(-0.08, 0.08, settle),
       smoothing
     );
     group.current.rotation.z = lerp(
