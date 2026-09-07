@@ -3,7 +3,6 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
   scrollProgressRef,
-  mouseRef,
   smoothstep,
   mapRange,
   lerp,
@@ -59,26 +58,22 @@ export function ScrollCamera() {
       );
       targetLook.current.set(0, 0, 4);
     } else {
+      // Final cup: camera sits slightly above eye level and looks down just
+      // enough to reveal the cappuccino surface without becoming a top-down shot.
       targetPos.current.set(
         0,
-        mapRange(p, 0.76, 0.84, 0, 0.5),
-        mapRange(p, 0.76, 0.84, 7, 8)
+        mapRange(p, 0.76, 0.84, 0.75, 1.35),
+        mapRange(p, 0.76, 0.84, 7.2, 7.7)
       );
-      targetLook.current.set(0, 0.5, 4);
+      targetLook.current.set(0, 0.12, 3.18);
     }
 
-    const mx = mouseRef.x * 0.5;
-    const my = mouseRef.y * 0.3;
-
-    camera.position.x = lerp(camera.position.x, targetPos.current.x + mx, smoothing);
-    camera.position.y = lerp(camera.position.y, targetPos.current.y + my, smoothing);
+    camera.position.x = lerp(camera.position.x, targetPos.current.x, smoothing);
+    camera.position.y = lerp(camera.position.y, targetPos.current.y, smoothing);
     camera.position.z = lerp(camera.position.z, targetPos.current.z, smoothing);
 
-    camera.lookAt(
-      lerp(0, targetLook.current.x, smoothing),
-      lerp(0, targetLook.current.y, smoothing),
-      lerp(0, targetLook.current.z, smoothing)
-    );
+    const lookTarget = new THREE.Vector3().copy(targetLook.current);
+    camera.lookAt(lookTarget);
   });
 
   return null;
