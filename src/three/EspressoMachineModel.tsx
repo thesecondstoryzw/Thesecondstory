@@ -27,7 +27,8 @@ export function EspressoMachineModel() {
     const box = new THREE.Box3().setFromObject(copy);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-    const targetHeight = 3.8;
+    // Keep the full machine inside a cinematic medium shot.
+    const targetHeight = 2.65;
     const modelScale = targetHeight / Math.max(size.y, 0.001);
 
     return {
@@ -57,7 +58,7 @@ export function EspressoMachineModel() {
 
     const target = new THREE.Vector3(
       lerp(0.8, -0.15, smoothstep(0.52, 0.68, p)) + vibration,
-      -1.9 + vibration * 0.35,
+      -1.35 + vibration * 0.35,
       2.4
     );
 
