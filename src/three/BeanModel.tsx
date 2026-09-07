@@ -12,6 +12,7 @@ export function BeanModel() {
   const { scene } = useGLTF(MODEL_PATH) as unknown as { scene: THREE.Group };
   const targetPosition = useMemo(() => new THREE.Vector3(), []);
   const targetRotation = useMemo(() => new THREE.Euler(), []);
+  const targetQuaternion = useMemo(() => new THREE.Quaternion(), []);
 
   const { cloned, offset, scale } = useMemo(() => {
     const c = scene.clone(true);
@@ -66,22 +67,28 @@ export function BeanModel() {
       visibility = 0;
     }
 
-    const smoothing = 1 - Math.pow(0.001, delta);
-    group.current.position.lerp(targetPosition, smoothing);
-    group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x, targetScale, smoothing));
-    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, targetRotation.x, smoothing);
-    group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetRotation.y, smoothing);
-    group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, targetRotation.z, smoothing);
-    group.current.visible = visibility > 0.01;
+    // Damp position/scale instead of snapping between chapter keyframes. Quaternion
+    // interpolation also prevents Euler-angle flips when the bean rotates.
+    const motion = 1 - Math.exp(-5.5 * delta);
+    const scaleMotion = 1 - Math.exp(-6.5 * delta);
+    group.current.position.lerp(targetPosition, motion);
+    const nextScale = THREE.MathUtils.lerp(group.current.scale.x, targetScale, scaleMotion);
+    group.current.scale.setScalar(nextScale);
+    targetQuaternion.setFromEuler(targetRotation);
+    group.current.quaternion.slerp(targetQuaternion, motion);
+
+    // Keep the bean in the scene and fade it continuously; toggling visibility at a
+    // chapter boundary was causing it to appear to pop to a new position.
+    group.current.visible = visibility > 0.001 || group.current.scale.x > 0.003;
 
     if (group.current.visible) {
       group.current.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           const materials = Array.isArray(child.material) ? child.material : [child.material];
           materials.forEach((material) => {
-            material.opacity = visibility;
-            material.transparent = visibility < 0.999;
-            material.depthWrite = visibility > 0.15;
+            material.transparent = true;
+            material.opacity = THREE.MathUtils.clamp(visibility, 0, 1);
+            material.depthWrite = visibility > 0.12;
           });
         }
       });
