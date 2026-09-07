@@ -12,7 +12,7 @@ export function CupModel() {
   const group = useRef<THREE.Group>(null);
   const { scene } = useGLTF(MODEL_PATH) as unknown as { scene: THREE.Group };
 
-  const { cloned, offset, scale, coffeeY, coffeeRadius } = useMemo(() => {
+  const { cloned, offset, scale, coffeeY } = useMemo(() => {
     const copy = scene.clone(true);
     copy.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -27,8 +27,6 @@ export function CupModel() {
     const center = box.getCenter(new THREE.Vector3());
     const targetHeight = 1.62;
     const modelScale = targetHeight / Math.max(size.y, 0.001);
-    const normalizedWidth = size.x * modelScale;
-    const normalizedDepth = size.z * modelScale;
 
     return {
       cloned: copy,
@@ -36,8 +34,6 @@ export function CupModel() {
       scale: modelScale,
       // Keep the liquid just inside the rim, not at saucer height.
       coffeeY: targetHeight * 0.955,
-      // Bounds include the saucer; deliberately use a conservative fraction for the actual cup opening.
-      coffeeRadius: Math.max(0.22, Math.min(normalizedWidth, normalizedDepth) * 0.38),
     };
   }, [scene]);
 
@@ -72,15 +68,24 @@ export function CupModel() {
     <group ref={group} visible={false}>
       <group scale={scale} position={offset}><primitive object={cloned} /></group>
 
-      {/* A guaranteed visible coffee surface with a darker outer body and warm crema centre. */}
+      {/* Keep the coffee inside the cup.  Do not derive its radius from the whole model,
+          because this asset's bounds include the saucer and handle, which previously
+          created the oversized black oval around the cup. */}
       <group position={[0, coffeeY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <mesh castShadow receiveShadow>
-          <circleGeometry args={[coffeeRadius, 64]} />
-          <meshStandardMaterial color="#251008" roughness={0.2} metalness={0.02} side={THREE.DoubleSide} />
+          <circleGeometry args={[0.43, 64]} />
+          <meshPhysicalMaterial
+            color="#6f3217"
+            roughness={0.26}
+            metalness={0}
+            clearcoat={0.18}
+            clearcoatRoughness={0.22}
+            side={THREE.DoubleSide}
+          />
         </mesh>
-        <mesh position={[0, 0, 0.003]}>
-          <circleGeometry args={[coffeeRadius * 0.7, 64]} />
-          <meshStandardMaterial color="#9a5725" roughness={0.32} metalness={0} transparent opacity={0.86} side={THREE.DoubleSide} />
+        <mesh position={[0, 0, 0.002]}>
+          <circleGeometry args={[0.30, 64]} />
+          <meshStandardMaterial color="#b56a2d" roughness={0.38} transparent opacity={0.42} side={THREE.DoubleSide} />
         </mesh>
       </group>
 
