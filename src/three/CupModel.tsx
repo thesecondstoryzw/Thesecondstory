@@ -7,11 +7,12 @@ import { clamp, lerp, scrollProgressRef, smoothstep } from '@/three/scrollState'
 const MODEL_PATH = '/models/cup.glb';
 
 /**
- * The cup asset has its strongest texture/detail on one side.
- * Keep HANDLE_LEFT_ROTATION as the single place to tune the hero orientation.
+ * Final product shot:
+ * - rotate the asset so its detailed face is presented
+ * - keep the handle on the viewer's LEFT
+ * - tilt enough to reveal the cappuccino surface
  */
-// Rotate the asset so the handle sits clearly on the viewer's left in the final hero shot.
-const HANDLE_LEFT_ROTATION = -Math.PI / 2;
+const HANDLE_LEFT_ROTATION = Math.PI / 2;
 
 useGLTF.preload(MODEL_PATH);
 
@@ -34,8 +35,7 @@ export function CupModel() {
     const box = new THREE.Box3().setFromObject(copy);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-    // Smaller than the previous version so the full silhouette and coffee surface can breathe.
-    const targetHeight = 2.35;
+    const targetHeight = 1.85;
     const modelScale = targetHeight / Math.max(size.y, 0.001);
 
     return {
@@ -58,23 +58,22 @@ export function CupModel() {
     const settle = smoothstep(0.80, 0.92, p);
 
     const target = new THREE.Vector3(
-      lerp(0.55, 0, settle),
-      -1.2 + Math.sin(state.clock.elapsedTime * 1.3) * 0.015 * settle,
-      lerp(3.25, 2.65, settle)
+      lerp(0.35, 0, settle),
+      -0.95 + Math.sin(state.clock.elapsedTime * 1.1) * 0.01 * settle,
+      lerp(3.45, 3.0, settle)
     );
 
     const smoothing = 1 - Math.pow(0.001, delta);
     group.current.position.lerp(target, smoothing);
-    // Slightly elevated product-shot angle so the coffee surface is visible.
-    group.current.rotation.x = lerp(group.current.rotation.x, -0.16, smoothing);
+    group.current.rotation.x = lerp(group.current.rotation.x, -0.28, smoothing);
     group.current.rotation.y = lerp(
       group.current.rotation.y,
-      HANDLE_LEFT_ROTATION + lerp(-0.08, 0.08, settle),
+      HANDLE_LEFT_ROTATION + lerp(-0.05, 0.05, settle),
       smoothing
     );
     group.current.rotation.z = lerp(
       group.current.rotation.z,
-      Math.sin(state.clock.elapsedTime * 0.7) * 0.012 * settle,
+      Math.sin(state.clock.elapsedTime * 0.6) * 0.008 * settle,
       smoothing
     );
     group.current.visible = visibility > 0.01;
@@ -95,20 +94,8 @@ export function CupModel() {
       <group scale={scale} position={offset}>
         <primitive object={cloned} />
       </group>
-      <pointLight
-        position={[-1.6, 2.2, 2.4]}
-        color="#f4d5aa"
-        intensity={2.2}
-        distance={7}
-        decay={2}
-      />
-      <pointLight
-        position={[1.8, 0.8, 1.4]}
-        color="#c8794a"
-        intensity={1.2}
-        distance={5}
-        decay={2}
-      />
+      <pointLight position={[-1.4, 1.9, 2.2]} color="#f4d5aa" intensity={1.7} distance={6} decay={2} />
+      <pointLight position={[1.5, 0.7, 1.4]} color="#c8794a" intensity={0.9} distance={4} decay={2} />
     </group>
   );
 }
