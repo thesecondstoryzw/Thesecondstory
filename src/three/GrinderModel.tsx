@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { clamp, lerp, scrollProgressRef, smoothstep } from '@/three/scrollState';
+import { clamp, lerp, sceneProgressRef, smoothstep } from '@/three/scrollState';
 
 const MODEL_PATH = '/models/coffee-grinder.glb';
 useGLTF.preload(MODEL_PATH);
@@ -41,7 +41,7 @@ export function GrinderModel() {
 
   useFrame((state, delta) => {
     if (!group.current) return;
-    const p = scrollProgressRef.current;
+    const p = sceneProgressRef.current;
     const enter = smoothstep(0.30, 0.37, p);
     const leave = 1 - smoothstep(0.545, 0.585, p);
     const visibility = clamp(enter * leave, 0, 1);
