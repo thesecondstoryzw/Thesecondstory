@@ -7,6 +7,10 @@ export function ScrollCamera() {
   const { camera } = useThree();
   const targetPos = useRef(new THREE.Vector3(0, 0, 10));
   const targetLook = useRef(new THREE.Vector3(0, 0, 0));
+  // Keep the camera's look target damped as well as its position. Previously
+  // targetLook was changed instantly at chapter boundaries (especially 0.28),
+  // which made stationary objects appear to jump sideways when the copy changed.
+  const currentLook = useRef(new THREE.Vector3(0, 0, 0));
 
   useFrame((_, delta) => {
     const p = sceneProgressRef.current;
@@ -35,7 +39,12 @@ export function ScrollCamera() {
     camera.position.x = lerp(camera.position.x, targetPos.current.x, smoothing);
     camera.position.y = lerp(camera.position.y, targetPos.current.y, smoothing);
     camera.position.z = lerp(camera.position.z, targetPos.current.z, smoothing);
-    camera.lookAt(targetLook.current);
+
+    // Never snap the viewing direction between chapters. Damping this point keeps
+    // the coffee bean and every other model visually continuous through text/
+    // chapter transitions.
+    currentLook.current.lerp(targetLook.current, smoothing);
+    camera.lookAt(currentLook.current);
   });
 
   return null;
