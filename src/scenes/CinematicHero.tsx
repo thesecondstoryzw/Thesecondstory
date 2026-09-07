@@ -33,7 +33,7 @@ export function CinematicHero() {
         <div
           className="absolute inset-0 bg-cover bg-no-repeat"
           style={{
-            backgroundImage: 'url("/models/Hero%20image.png")',
+            backgroundImage: 'url("/models/Hero1.png")',
             backgroundPosition: '34% center',
             filter: 'brightness(0.82) contrast(1.08) saturate(0.92)',
           }}
