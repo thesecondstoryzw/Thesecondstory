@@ -5,7 +5,6 @@ import * as THREE from 'three';
 import { clamp, lerp, scrollProgressRef, smoothstep } from '@/three/scrollState';
 
 const MODEL_PATH = '/models/espresso-machine.glb';
-
 useGLTF.preload(MODEL_PATH);
 
 export function EspressoMachineModel() {
@@ -27,8 +26,7 @@ export function EspressoMachineModel() {
     const box = new THREE.Box3().setFromObject(copy);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
-    // Keep the full machine inside a cinematic medium shot.
-    const targetHeight = 2.65;
+    const targetHeight = 2.05;
     const modelScale = targetHeight / Math.max(size.y, 0.001);
 
     return {
@@ -53,23 +51,23 @@ export function EspressoMachineModel() {
 
     const vibration =
       brewing *
-      (Math.sin(state.clock.elapsedTime * 58) * 0.012 +
-        Math.sin(state.clock.elapsedTime * 23) * 0.006);
+      (Math.sin(state.clock.elapsedTime * 45) * 0.006 +
+        Math.sin(state.clock.elapsedTime * 21) * 0.003);
 
     const target = new THREE.Vector3(
-      lerp(0.8, -0.15, smoothstep(0.52, 0.68, p)) + vibration,
-      -1.35 + vibration * 0.35,
-      2.4
+      lerp(0.55, -0.08, smoothstep(0.52, 0.68, p)) + vibration,
+      -1.02 + vibration * 0.25,
+      2.75
     );
 
     const smoothing = 1 - Math.pow(0.001, delta);
     group.current.position.lerp(target, smoothing);
     group.current.rotation.y = lerp(
       group.current.rotation.y,
-      lerp(-0.35, 0.18, smoothstep(0.56, 0.70, p)),
+      lerp(-0.28, 0.12, smoothstep(0.56, 0.70, p)),
       smoothing
     );
-    group.current.rotation.z = lerp(group.current.rotation.z, vibration * 0.35, smoothing);
+    group.current.rotation.z = lerp(group.current.rotation.z, vibration * 0.2, smoothing);
     group.current.visible = visibility > 0.01;
 
     group.current.traverse((child) => {
@@ -88,13 +86,7 @@ export function EspressoMachineModel() {
       <group scale={scale} position={offset}>
         <primitive object={cloned} />
       </group>
-      <pointLight
-        position={[0.25, 1.4, 1.2]}
-        color="#d79a58"
-        intensity={1.6}
-        distance={6}
-        decay={2}
-      />
+      <pointLight position={[0.25, 1.15, 1.2]} color="#d79a58" intensity={1.35} distance={5} decay={2} />
     </group>
   );
 }
