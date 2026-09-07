@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { clamp, lerp, scrollProgressRef, smoothstep } from '@/three/scrollState';
+import { clamp, lerp, sceneProgressRef, smoothstep } from '@/three/scrollState';
 
 const MODEL_PATH = '/models/cup.glb';
 const HANDLE_LEFT_ROTATION = Math.PI / 2;
@@ -39,7 +39,7 @@ export function CupModel() {
 
   useFrame((state, delta) => {
     if (!group.current) return;
-    const p = scrollProgressRef.current;
+    const p = sceneProgressRef.current;
     const visibility = clamp(smoothstep(0.74, 0.81, p), 0, 1);
     const settle = smoothstep(0.80, 0.92, p);
     const target = new THREE.Vector3(
